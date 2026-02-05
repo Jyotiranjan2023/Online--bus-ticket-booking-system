@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BusBook — Premium Bus Ticket Booking Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+:root {
+  --color-primary: #d84e55;
+  --color-primary-dark: #c23e44;
+  --color-primary-light: #ff6b72;
+  --color-secondary: #2563eb;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #1e293b;
+  --color-text-light: #64748b;
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); line-height: 1.6; min-height: 100vh; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+
+.navbar { background: var(--color-surface); border-bottom: 1px solid var(--color-border); padding: 0.75rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.navbar__container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.navbar__logo { font-family: var(--font-display); font-size: 1.625rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 0.5rem; }
+.navbar__logo-icon { font-size: 1.875rem; }
+.nav-links { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.nav-link { padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 500; font-size: 0.9375rem; color: var(--color-text-light); transition: all var(--transition); white-space: nowrap; }
+.nav-link:hover { color: var(--color-primary); background: rgba(216, 78, 85, 0.05); }
+.nav-link.active { color: var(--color-primary); background: rgba(216, 78, 85, 0.1); font-weight: 600; }
+.nav-user-badge { padding: 0.375rem 0.875rem; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); color: white; border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-logout { padding: 0.5rem 1.25rem; background: white; color: var(--color-danger); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; font-size: 0.875rem; transition: all var(--transition); }
+.btn-logout:hover { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.05); }
+
+.main { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem 2rem; min-height: calc(100vh - 200px); }
+.view { display: none; animation: fadeSlideUp 0.4s var(--transition); }
+.view.active { display: block; }
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* HERO SECTION WITH BACKGROUND - REDBUS STYLE */
+.home-hero {
+  position: relative;
+  text-align: left;
+  margin: -2rem -1.5rem 2rem -1.5rem;
+  padding: 3rem 0 6rem 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('image/bus.jpeg');
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.home-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, rgba(247, 249, 252, 0.3));
+  z-index: 1;
+}
+
+.home-hero__content {
+  position: relative;
+  z-index: 2;
+  color: white;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
+}
+
+.home-hero__title { 
+  font-family: var(--font-display); 
+  font-size: 2.75rem; 
+  font-weight: 800; 
+  color: white; 
+  margin-bottom: 0.75rem; 
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.home-hero__title-accent { 
+  color: white;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.home-hero__subtitle { 
+  font-size: 1rem; 
+  color: rgba(255, 255, 255, 0.95); 
+  max-width: 700px; 
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  font-weight: 400;
+}
+
+.search-card { 
+  background: var(--color-surface); 
+  border-radius: var(--radius-lg); 
+  padding: 2rem; 
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12); 
+  max-width: 900px; 
+  margin: -4rem auto 2rem; 
+  border: 1px solid var(--color-border);
+  position: relative;
+  z-index: 10;
+}
+.search-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: end; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-label { font-weight: 600; font-size: 0.8125rem; color: var(--color-text); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 0.375rem; display: flex; align-items: center; gap: 0.375rem; }
+.form-label::before { content: '📍'; font-size: 0.875rem; }
+.form-label:has(+ #searchDest)::before { content: '📍'; }
+.form-label:has(+ #searchDate)::before { content: '📅'; }
+.form-input { padding: 0.875rem 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.9375rem; color: var(--color-text); background: var(--color-surface); transition: all var(--transition); outline: none; }
+.form-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(216, 78, 85, 0.08); }
+.form-input::placeholder { color: #94a3b8; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.875rem 1.75rem; border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem; transition: all var(--transition); cursor: pointer; border: none; white-space: nowrap; }
+.btn-primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: white; box-shadow: 0 4px 12px rgba(216, 78, 85, 0.25); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(216, 78, 85, 0.35); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { background: white; color: var(--color-text); border: 1.5px solid var(--color-border); }
+.btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); background: rgba(216, 78, 85, 0.05); }
+.btn-full { width: 100%; }
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+.btn-danger { background: white; color: var(--color-danger); border: 1.5px solid var(--color-danger); }
+.btn-danger:hover { background: var(--color-danger); color: white; }
+
+.results-section { max-width: 900px; margin: 0 auto; }
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--color-border); }
+.results-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--color-text); }
+.results-count { font-size: 0.875rem; color: var(--color-text-light); background: var(--color-surface); padding: 0.375rem 0.875rem; border-radius: var(--radius-full); border: 1px solid var(--color-border); }
+
+.schedule-card { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1.5rem; cursor: pointer; transition: all var(--transition); }
+.schedule-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-xl); transform: translateY(-4px); }
+.schedule-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.schedule-route { display: flex; align-items: center; gap: 1rem; }
+.schedule-city { font-weight: 700; font-size: 1.25rem; color: var(--color-text); }
+.schedule-arrow { color: var(--color-primary); font-size: 1.5rem; font-weight: 300; }
+.schedule-price { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: var(--color-primary); }
+.schedule-price-label { font-size: 0.875rem; color: var(--color-text-light); font-weight: 500; }
+.schedule-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.schedule-meta-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-text-light); }
+.schedule-meta-icon { font-size: 1.125rem; }
+
+.auth-container { max-width: 480px; margin: 3rem auto; }
+.auth-card { background: var(--color-surface); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-xl); border: 1px solid var(--color-border); }
+.auth-header { text-align: center; margin-bottom: 2rem; }
+.auth-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem; }
+.auth-subtitle { font-size: 0.9375rem; color: var(--color-text-light); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: var(--color-bg); padding: 0.25rem; border-radius: var(--radius-md); margin-bottom: 2rem; }
+.auth-tab { padding: 0.75rem; border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem; color: var(--color-text-light); transition: all var(--transition); }
+.auth-tab.active { background: var(--color-surface); color: var(--color-primary); box-shadow: var(--shadow-sm); }
+.auth-form { display: none; }
+.auth-form.active { display: block; animation: fadeSlideUp 0.3s var(--transition); }
+.auth-form .form-group { margin-bottom: 1.5rem; }
+
+.seat-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.btn-back { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; color: var(--color-text-light); transition: all var(--transition); }
+.btn-back:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+.seat-info-card { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); color: white; border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-lg); }
+.seat-info-route { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.seat-info-city { font-weight: 700; font-size: 1.5rem; }
+.seat-info-arrow { font-size: 1.75rem; opacity: 0.8; }
+.seat-info-meta { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9375rem; opacity: 0.95; }
+.seat-info-price { margin-left: auto; font-family: var(--font-display); font-size: 2rem; font-weight: 800; }
+
+.bus-layout-card { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; }
+.bus-layout-title { font-weight: 700; font-size: 1.125rem; color: var(--color-text); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.driver-section { background: var(--color-bg); border-radius: var(--radius-md); padding: 1rem 1.5rem; margin-bottom: 2rem; display: inline-flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--color-text-light); }
+.seats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.seat-btn { aspect-ratio: 1; border-radius: var(--radius-md); border: 2px solid var(--color-border); background: var(--color-surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; font-weight: 700; transition: all 150ms; cursor: pointer; }
+.seat-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.seat-number { font-size: 1rem; font-weight: 700; }
+.seat-icon { font-size: 1.25rem; opacity: 0.6; }
+.seat-btn.available { border-color: var(--color-success); background: rgba(16, 185, 129, 0.05); color: var(--color-success); }
+.seat-btn.available:hover { background: rgba(16, 185, 129, 0.15); border-color: var(--color-success); }
+.seat-btn.selected { border-color: var(--color-primary); background: var(--color-primary); color: white; box-shadow: 0 4px 12px rgba(216, 78, 85, 0.3); }
+.seat-btn.booked { border-color: var(--color-border); background: var(--color-bg); color: #94a3b8; cursor: not-allowed; opacity: 0.5; }
+
+.seat-legend { display: flex; gap: 2rem; flex-wrap: wrap; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+.legend-item { display: flex; align-items: center; gap: 0.625rem; font-size: 0.875rem; color: var(--color-text-light); font-weight: 500; }
+.legend-dot { width: 20px; height: 20px; border-radius: var(--radius-sm); border: 2px solid; }
+.legend-dot.available { border-color: var(--color-success); background: rgba(16, 185, 129, 0.1); }
+.legend-dot.selected { border-color: var(--color-primary); background: var(--color-primary); }
+.legend-dot.booked { border-color: var(--color-border); background: var(--color-bg); }
+
+.booking-bar { position: sticky; bottom: 1.5rem; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-xl); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; animation: slideUp 0.3s var(--transition); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.booking-info { flex: 1; }
+.booking-seats { font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem; }
+.booking-seats strong { color: var(--color-text); font-weight: 700; }
+.booking-total { font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: var(--color-primary); }
+
+.section-header { margin-bottom: 2rem; }
+.section-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--color-text); }
+
+.booking-card { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1.5rem; transition: all var(--transition); }
+.booking-card:hover { box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+.booking-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.booking-id { font-size: 0.875rem; font-weight: 600; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.booking-id strong { color: var(--color-primary); }
+.status-badge { padding: 0.375rem 0.875rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-badge.confirmed { background: rgba(16, 185, 129, 0.1); color: var(--color-success); }
+.status-badge.cancelled { background: rgba(239, 68, 68, 0.1); color: var(--color-danger); }
+.booking-route { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.booking-city { font-weight: 700; font-size: 1.25rem; color: var(--color-text); }
+.booking-arrow { color: var(--color-primary); font-size: 1.5rem; }
+.booking-meta { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--color-text-light); }
+.booking-seats-list { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.seat-tag { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.375rem 0.75rem; font-size: 0.8125rem; color: var(--color-text-light); font-weight: 600; }
+.seat-tag strong { color: var(--color-text); }
+.booking-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.admin-title { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--color-text); }
+.admin-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; background: var(--color-surface); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+.admin-tab { padding: 0.625rem 1.25rem; border-radius: var(--radius-md); font-weight: 600; font-size: 0.875rem; color: var(--color-text-light); transition: all var(--transition); white-space: nowrap; }
+.admin-tab:hover { background: var(--color-bg); }
+.admin-tab.active { background: var(--color-primary); color: white; box-shadow: 0 2px 8px rgba(216, 78, 85, 0.3); }
+
+.admin-panel { display: none; }
+.admin-panel.active { display: block; animation: fadeSlideUp 0.3s var(--transition); }
+.admin-card { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; }
+.admin-card-title { font-weight: 700; font-size: 1.125rem; color: var(--color-text); margin-bottom: 1.5rem; }
+.admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: end; }
+
+.admin-table-container { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table thead { background: var(--color-bg); }
+.admin-table th { padding: 1rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--color-text-light); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+.admin-table td { padding: 1rem; font-size: 0.875rem; color: var(--color-text); border-bottom: 1px solid var(--color-border); white-space: nowrap; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: #f8fafc; }
+.table-empty { padding: 2rem; text-align: center; color: var(--color-text-light); }
+
+.overview-summary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); color: white; border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; }
+.overview-summary h4 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+.overview-summary p { margin-bottom: 0.5rem; opacity: 0.95; }
+.overview-stats { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.overview-stats span { font-size: 0.9375rem; }
+.overview-stats strong { font-size: 1.5rem; font-weight: 700; }
+
+.spinner-container { text-align: center; padding: 2rem 0; }
+.spinner { width: 40px; height: 40px; margin: 0 auto; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state { text-align: center; padding: 2rem; color: var(--color-text-light); }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+.empty-message { font-size: 1rem; }
+
+.toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; max-width: 400px; }
+.toast { background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.5rem; box-shadow: var(--shadow-xl); display: flex; align-items: center; gap: 1rem; animation: slideInRight 0.3s var(--transition); }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+.toast-icon { font-size: 1.25rem; flex-shrink: 0; }
+.toast.success { border-color: var(--color-success); }
+.toast.success .toast-icon { color: var(--color-success); }
+.toast.error { border-color: var(--color-danger); }
+.toast.error .toast-icon { color: var(--color-danger); }
+.toast.info { border-color: var(--color-secondary); }
+.toast.info .toast-icon { color: var(--color-secondary); }
+.toast-message { font-size: 0.875rem; font-weight: 500; color: var(--color-text); }
+
+.payment-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s var(--transition); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.payment-modal { background: var(--color-surface); border-radius: var(--radius-lg); padding: 2rem; max-width: 400px; width: 90%; text-align: center; box-shadow: var(--shadow-xl); }
+.payment-modal h3 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem; }
+.payment-modal p { color: var(--color-text-light); font-size: 0.9375rem; }
+
+@media (max-width: 768px) {
+  .navbar__container { flex-direction: column; align-items: flex-start; }
+  .home-hero { 
+    padding: 2.5rem 0 5rem 0; 
+    min-height: 360px; 
+    margin: -2rem -1rem 2rem -1rem;
+  }
+  .home-hero__content { padding: 0 1.5rem; }
+  .home-hero__title { font-size: 2rem; }
+  .home-hero__subtitle { font-size: 0.9375rem; }
+  .search-card { margin: -3.5rem 1rem 2rem; padding: 1.5rem; }
+  .search-form { grid-template-columns: 1fr; }
+  .schedule-header, .seat-info-route, .booking-header { flex-direction: column; align-items: flex-start; }
+  .seats-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 0.5rem; }
+  .booking-bar { position: fixed; bottom: 0; left: 0; right: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; margin: 0; }
+  .admin-form { grid-template-columns: 1fr; }
+  .admin-table-container { overflow-x: auto; }
+}
+
+@media (max-width: 480px) {
+  .main { padding: 0 1rem 2rem; }
+  .search-card, .auth-card, .admin-card { padding: 1.5rem; }
+  .home-hero { 
+    padding: 2rem 0 4.5rem 0; 
+    min-height: 320px;
+    margin: -2rem -1rem 2rem -1rem;
+  }
+  .home-hero__content { padding: 0 1rem; }
+  .home-hero__title { font-size: 1.75rem; }
+  .home-hero__subtitle { font-size: 0.875rem; }
+  .search-card { margin: -3rem 0.5rem 2rem; }
+  .toast-container { left: 1rem; right: 1rem; max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav class="navbar">
+    <div class="navbar__container">
+      <div class="navbar__logo">
+        <span class="navbar__logo-icon">🚌</span>
+        BusBook
+      </div>
+      <div class="nav-links" id="navLinks"></div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- HOME VIEW -->
+    <section class="view active" id="view-home">
+      <div class="home-hero">
+        <div class="home-hero__content">
+          <h1 class="home-hero__title">
+            India's No. 1 online<br>bus ticket booking site
+          </h1>
+          <p class="home-hero__subtitle">
+            Book bus tickets with ease • Get instant confirmation • Travel with confidence
+          </p>
+        </div>
+      </div>
+
+      <div class="search-card">
+        <form class="search-form" onsubmit="event.preventDefault(); doSearch();">
+          <div class="form-group">
+            <label class="form-label">FROM</label>
+            <input type="text" class="form-input" id="searchSource" placeholder="Enter source city" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">TO</label>
+            <input type="text" class="form-input" id="searchDest" placeholder="Enter destination" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">DATE</label>
+            <input type="date" class="form-input" id="searchDate" required/>
+          </div>
+          <button type="submit" class="btn btn-primary">🔍 SEARCH BUSES</button>
+        </form>
+      </div>
+
+      <div class="results-section" id="resultsSection" style="display:none">
+        <div class="results-header">
+          <h3 class="results-title">Available Buses</h3>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+        <div id="resultsList"></div>
+      </div>
+    </section>
+
+    <!-- AUTH VIEW -->
+    <section class="view" id="view-auth">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to continue your journey</p>
+          </div>
+
+          <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuth('login')">Sign In</button>
+            <button class="auth-tab" onclick="switchAuth('register')">Register</button>
+          </div>
+
+          <form class="auth-form active" id="form-login" onsubmit="event.preventDefault(); doLogin();">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required/>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          </form>
+
+          <form class="auth-form" id="form-register" onsubmit="event.preventDefault(); doRegister();">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-input" id="regName" placeholder="John Doe" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" id="regEmail" placeholder="your@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" id="regPassword" placeholder="Min 6 characters" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Register As</label>
+              <select class="form-input" id="regRole">
+                <option value="PASSENGER">Passenger</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEAT SELECTION VIEW -->
+    <section class="view" id="view-seats">
+      <div class="seat-header">
+        <button class="btn-back" onclick="navigate('home')">← Back to Search</button>
+      </div>
+
+      <div class="seat-info-card" id="seatInfoBar"></div>
+
+      <div class="bus-layout-card">
+        <h3 class="bus-layout-title">Select Your Seats</h3>
+        <div class="driver-section">🚌 Driver</div>
+        <div class="seats-grid" id="seatsGrid"></div>
+        <div class="seat-legend">
+          <div class="legend-item"><div class="legend-dot available"></div>Available</div>
+          <div class="legend-item"><div class="legend-dot selected"></div>Selected</div>
+          <div class="legend-item"><div class="legend-dot booked"></div>Booked</div>
+        </div>
+      </div>
+
+      <div id="bookingBar" style="display:none" class="booking-bar">
+        <div class="booking-info">
+          <div class="booking-seats"><strong id="bbSeatCount">0</strong> seat(s) selected</div>
+          <div class="booking-total">₹<span id="bbTotal">0</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="confirmBooking()">💳 Proceed to Payment</button>
+      </div>
+    </section>
+
+    <!-- MY BOOKINGS VIEW -->
+    <section class="view" id="view-bookings">
+      <div class="section-header">
+        <h2 class="section-title">My Bookings</h2>
+      </div>
+      <div id="bookingsList"></div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section class="view" id="view-admin">
+      <div class="admin-header">
+        <h2 class="admin-title">Admin Dashboard</h2>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('buses')">🚌 Buses</button>
+        <button class="admin-tab" onclick="switchAdminTab('routes')">🗺️ Routes</button>
+        <button class="admin-tab" onclick="switchAdminTab('schedules')">📅 Schedules</button>
+        <button class="admin-tab" onclick="switchAdminTab('seats')">💺 Seats</button>
+        <button class="admin-tab" onclick="switchAdminTab('bookings')">📊 Bookings</button>
+      </div>
+
+      <!-- BUSES PANEL -->
+      <div class="admin-panel active" id="panel-buses">
+        <div class="admin-card">
+          <h4 class="admin-card-title">Add New Bus</h4>
+          <form class="admin-form" onsubmit="event.preventDefault(); addBus();">
+            <div class="form-group">
+              <label class="form-label">Bus Number</label>
+              <input type="text" class="form-input" id="addBusNumber" placeholder="e.g. MH-01-AB-1234" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bus Type</label>
+              <input type="text" class="form-input" id="addBusType" placeholder="e.g. AC Sleeper" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Seats</label>
+              <input type="number" class="form-input" id="addBusTotalSeats" placeholder="40" required/>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Bus</button>
+          </form>
+        </div>
+        <div class="admin-table-container" id="busesTable">
+          <div class="spinner-container"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- ROUTES PANEL -->
+      <div class="admin-panel" id="panel-routes">
+        <div class="admin-card">
+          <h4 class="admin-card-title">Add New Route</h4>
+          <form class="admin-form" onsubmit="event.preventDefault(); addRoute();">
+            <div class="form-group">
+              <label class="form-label">Source City</label>
+              <input type="text" class="form-input" id="addRouteSource" placeholder="Delhi" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Destination City</label>
+              <input type="text" class="form-input" id="addRouteDest" placeholder="Mumbai" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Distance (km)</label>
+              <input type="number" class="form-input" id="addRouteDist" placeholder="1400" required/>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Route</button>
+          </form>
+        </div>
+        <div class="admin-table-container" id="routesTable">
+          <div class="spinner-container"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- SCHEDULES PANEL -->
+      <div class="admin-panel" id="panel-schedules">
+        <div class="admin-card">
+          <h4 class="admin-card-title">Add New Schedule</h4>
+          <form class="admin-form" onsubmit="event.preventDefault(); addSchedule();">
+            <div class="form-group">
+              <label class="form-label">Select Bus</label>
+              <select class="form-input" id="addSchedBus" required>
+                <option value="">Choose a bus</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Route</label>
+              <select class="form-input" id="addSchedRoute" required>
+                <option value="">Choose a route</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Travel Date</label>
+              <input type="date" class="form-input" id="addSchedDate" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Departure Time</label>
+              <input type="time" class="form-input" id="addSchedTime" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price (₹)</label>
+              <input type="number" class="form-input" id="addSchedPrice" placeholder="500" required/>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Schedule</button>
+          </form>
+        </div>
+        <div class="admin-table-container" id="schedulesTable">
+          <div class="spinner-container"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- SEATS PANEL -->
+      <div class="admin-panel" id="panel-seats">
+        <div class="admin-card">
+          <h4 class="admin-card-title">Manage Seats</h4>
+          <form class="admin-form" onsubmit="event.preventDefault(); addSeat();">
+            <div class="form-group">
+              <label class="form-label">Select Schedule</label>
+              <select class="form-input" id="addSeatSchedule" required>
+                <option value="">Choose a schedule</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seat Number</label>
+              <input type="number" class="form-input" id="addSeatNumber" placeholder="1" required/>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Add Single Seat</button>
+          </form>
+          
+          <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+            <h4 class="admin-card-title">Bulk Add Seats</h4>
+            <form class="admin-form" onsubmit="event.preventDefault(); addBulkSeats();">
+              <div class="form-group">
+                <label class="form-label">From Seat</label>
+                <input type="number" class="form-input" id="bulkFrom" placeholder="1"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">To Seat</label>
+                <input type="number" class="form-input" id="bulkTo" placeholder="40"/>
+              </div>
+              <button type="submit" class="btn btn-secondary">Add Bulk Seats</button>
+            </form>
+          </div>
+        </div>
+        <div class="admin-table-container" id="seatsAdminTable">
+          <div class="table-empty">Select a schedule to manage seats</div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS PANEL -->
+      <div class="admin-panel" id="panel-bookings">
+        <div class="admin-card">
+          <h4 class="admin-card-title">Booking Overview</h4>
+          <form class="admin-form" onsubmit="event.preventDefault(); loadScheduleBookings();">
+            <div class="form-group">
+              <label class="form-label">Select Schedule</label>
+              <select class="form-input" id="adminBookingSchedule">
+                <option value="">Choose a schedule</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">View Bookings</button>
+          </form>
+        </div>
+        <div id="scheduleSummary"></div>
+        <div id="passengerTable"></div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<div class="toast-container" id="toastWrap"></div>
+
+<script>
+const API = 'https://localhost:8443';
+const RAZORPAY_KEY_ID = 'rzp_test_SBejM7AQsEW0jf';
+const ENABLE_PAYMENT = true;
+
+let state = {
+  token: sessionStorage.getItem('bb_token') || null,
+  role:  sessionStorage.getItem('bb_role')  || null,
+  email: sessionStorage.getItem('bb_email') || null,
+  name:  sessionStorage.getItem('bb_name')  || null,
+  currentSchedule: null,
+  currentScheduleId: null,
+  allSeats: [],
+  selectedSeatIds: []
+};
+
+async function http(method, path, body, params = {}) {
+  const url = new URL(path, API);
+  Object.entries(params).forEach(([k, v]) => {
+    if (Array.isArray(v)) v.forEach(i => url.searchParams.append(k, i));
+    else url.searchParams.append(k, v);
+  });
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || `HTTP ${res.status}`);
+    }
+    const ct = res.headers.get('content-type') || '';
+    return ct.includes('json') ? res.json() : res.text();
+  } catch (error) {
+    console.error('HTTP Error:', error);
+    throw error;
+  }
+}
+
+function toast(msg, type = 'info') {
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `
+    <span class="toast-icon">${icons[type]||'ℹ'}</span>
+    <span class="toast-message">${msg}</span>
+  `;
+  document.getElementById('toastWrap').prepend(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+const VIEWS = ['home','auth','seats','bookings','admin'];
+
+function navigate(view) {
+  VIEWS.forEach(v => {
+    document.getElementById('view-' + v)?.classList.toggle('active', v === view);
+  });
+  renderNav();
+  if (view === 'bookings') loadMyBookings();
+  if (view === 'admin') initAdmin();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderNav() {
+  const el = document.getElementById('navLinks');
+  let html = '';
+  if (state.token) {
+    html += `<a href="#" onclick="navigate('home')" class="nav-link ${activeView()==='home'?'active':''}">Search</a>`;
+    if (state.role === 'PASSENGER') {
+      html += `<a href="#" onclick="navigate('bookings')" class="nav-link ${activeView()==='bookings'?'active':''}">My Bookings</a>`;
+    }
+    if (state.role === 'ADMIN') {
+      html += `<a href="#" onclick="navigate('admin')" class="nav-link ${activeView()==='admin'?'active':''}">Dashboard</a>`;
+    }
+    html += `<span class="nav-user-badge">${state.role}</span>`;
+    html += `<button class="btn-logout" onclick="doLogout()">Logout</button>`;
+  } else {
+    html += `<a href="#" onclick="navigate('home')" class="nav-link ${activeView()==='home'?'active':''}">Home</a>`;
+    html += `<a href="#" onclick="navigate('auth')" class="nav-link ${activeView()==='auth'?'active':''}">Sign In</a>`;
+  }
+  el.innerHTML = html;
+}
+
+function activeView() {
+  const v = document.querySelector('.view.active');
+  return v ? v.id.replace('view-', '') : 'home';
+}
+
+function switchAuth(tab) {
+  document.querySelectorAll('.auth-tab').forEach((b, i) => 
+    b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'))
+  );
+  document.getElementById('form-login').classList.toggle('active', tab === 'login');
+  document.getElementById('form-register').classList.toggle('active', tab === 'register');
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return toast('Please fill in all fields', 'error');
+  
+  try {
+    const res = await http('POST', '/auth/login', { email, password });
+    const payload = JSON.parse(atob(res.token.split('.')[1]));
+    state.token = res.token;
+    state.role  = payload.role?.replace('ROLE_', '') || 'PASSENGER';
+    state.email = email;
+    state.name  = payload.sub || email.split('@')[0];
+    sessionStorage.setItem('bb_token', state.token);
+    sessionStorage.setItem('bb_role', state.role);
+    sessionStorage.setItem('bb_email', state.email);
+    sessionStorage.setItem('bb_name', state.name);
+    
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    if (resultsSection) resultsSection.style.display = 'none';
+    if (resultsList) resultsList.innerHTML = '';
+    
+    toast('Welcome back, ' + state.name + '!', 'success');
+    navigate('home');
+  } catch (e) {
+    toast(e.message || 'Invalid email or password', 'error');
+  }
+}
+
+async function doRegister() {
+  const name     = document.getElementById('regName').value.trim();
+  const email    = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const role     = document.getElementById('regRole').value;
+  
+  if (!name || !email || !password) return toast('Please fill in all fields', 'error');
+  if (password.length < 6) return toast('Password must be at least 6 characters', 'error');
+  
+  try {
+    await http('POST', '/users/register', { name, email, password, role });
+    toast('Account created successfully! Please sign in.', 'success');
+    switchAuth('login');
+    document.getElementById('loginEmail').value = email;
+  } catch (e) {
+    toast(e.message || 'Registration failed', 'error');
+  }
+}
+
+function doLogout() {
+  state = { token: null, role: null, email: null, name: null, currentSchedule: null, currentScheduleId: null, allSeats: [], selectedSeatIds: [] };
+  sessionStorage.clear();
+  
+  const resultsSection = document.getElementById('resultsSection');
+  const resultsList = document.getElementById('resultsList');
+  if (resultsSection) resultsSection.style.display = 'none';
+  if (resultsList) resultsList.innerHTML = '';
+  
+  document.getElementById('searchSource').value = '';
+  document.getElementById('searchDest').value = '';
+  const dateInput = document.getElementById('searchDate');
+  dateInput.value = dateInput.min;
+  
+  renderNav();
+  navigate('home');
+  toast('Logged out successfully', 'info');
+}
+
+async function doSearch() {
+  const source = document.getElementById('searchSource').value.trim();
+  const dest   = document.getElementById('searchDest').value.trim();
+  const date   = document.getElementById('searchDate').value;
+  
+  if (!source || !dest || !date) return toast('Please fill in all search fields', 'error');
+
+  const resultsSection = document.getElementById('resultsSection');
+  const resultsList    = document.getElementById('resultsList');
+  resultsSection.style.display = 'block';
+  resultsList.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
+
+  try {
+    const schedules = await http('GET', '/search', null, { source, destination: dest, date });
+    document.getElementById('resultsCount').textContent = schedules.length + ' bus(es) found';
+    
+    if (schedules.length === 0) {
+      resultsList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🚌</div>
+          <p class="empty-message">No buses available for this route and date</p>
+        </div>
+      `;
+      return;
+    }
+    
+    resultsList.innerHTML = schedules.map(s => `
+      <div class="schedule-card" onclick="${state.token ? `openSeats(${s.id})` : `navigate('auth')`}">
+        <div class="schedule-header">
+          <div class="schedule-route">
+            <span class="schedule-city">${s.route.source}</span>
+            <span class="schedule-arrow">→</span>
+            <span class="schedule-city">${s.route.destination}</span>
+          </div>
+          <div>
+            <div class="schedule-price">₹${s.price}</div>
+            <div class="schedule-price-label">per seat</div>
+          </div>
+        </div>
+        <div class="schedule-meta">
+          <span class="schedule-meta-item"><span class="schedule-meta-icon">📅</span>${s.travelDate}</span>
+          <span class="schedule-meta-item"><span class="schedule-meta-icon">🕐</span>${s.departureTime}</span>
+          <span class="schedule-meta-item"><span class="schedule-meta-icon">🚍</span>${s.bus.busType}</span>
+          <span class="schedule-meta-item"><span class="schedule-meta-icon">🎫</span>${s.bus.busNumber}</span>
+          <span class="schedule-meta-item"><span class="schedule-meta-icon">📍</span>${s.route.distance} km</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    resultsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p class="empty-message">Failed to load results. Please try again.</p>
+      </div>
+    `;
+    toast(e.message || 'Search failed', 'error');
+  }
+}
+
+(function() {
+  const d = document.getElementById('searchDate');
+  d.min = new Date().toISOString().split('T')[0];
+  d.value = d.min;
+})();
+
+async function openSeats(scheduleId) {
+  navigate('seats');
+  const grid = document.getElementById('seatsGrid');
+  grid.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
+
+  try {
+    const seats = await http('GET', `/seats/available/${scheduleId}`);
+    state.allSeats = seats;
+    state.selectedSeatIds = [];
+    state.currentScheduleId = scheduleId;
+    
+    if (seats.length > 0 && seats[0].schedule) {
+      state.currentSchedule = seats[0].schedule;
+    } else {
+      state.currentSchedule = { id: scheduleId, route: {}, bus: {}, price: 0 };
+    }
+    
+    renderSeatInfo();
+    renderSeatsGrid(seats);
+  } catch (e) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p class="empty-message">Failed to load seats</p>
+      </div>
+    `;
+    toast(e.message || 'Failed to load seats', 'error');
+  }
+}
+
+function renderSeatInfo() {
+  const s = state.currentSchedule;
+  document.getElementById('seatInfoBar').innerHTML = `
+    <div class="seat-info-route">
+      <span class="seat-info-city">${s.route?.source || '—'}</span>
+      <span class="seat-info-arrow">→</span>
+      <span class="seat-info-city">${s.route?.destination || '—'}</span>
+    </div>
+    <div class="seat-info-meta">
+      <span>📅 ${s.travelDate || ''}</span>
+      <span>🕐 ${s.departureTime || ''}</span>
+      <span>🚍 ${s.bus?.busType || ''} (${s.bus?.busNumber || ''})</span>
+      <div class="seat-info-price">₹${s.price || 0}</div>
+    </div>
+  `;
+}
+
+function renderSeatsGrid(seats) {
+  const availableNumbers = new Set(seats.map(s => s.seatNumber));
+  const busTotal = state.currentSchedule?.bus?.totalSeats || 40;
+  const maxSeat = Math.max(busTotal, ...seats.map(s => s.seatNumber), 0);
+
+  let html = '';
+  for (let i = 1; i <= maxSeat; i++) {
+    const seatObj = seats.find(s => s.seatNumber === i);
+    if (seatObj) {
+      html += `
+        <button class="seat-btn available" id="seat-${seatObj.id}" 
+                onclick="toggleSeat(${seatObj.id}, ${i}, ${state.currentSchedule?.price || 0})">
+          <span class="seat-number">${i}</span>
+          <span class="seat-icon">💺</span>
+        </button>
+      `;
+    } else {
+      html += `
+        <button class="seat-btn booked" disabled>
+          <span class="seat-number">${i}</span>
+          <span class="seat-icon">✕</span>
+        </button>
+      `;
+    }
+  }
+
+  document.getElementById('seatsGrid').innerHTML = html;
+  updateBookingBar();
+}
+
+function toggleSeat(seatId, seatNum, price) {
+  const idx = state.selectedSeatIds.indexOf(seatId);
+  const btn = document.getElementById('seat-' + seatId);
+  
+  if (idx === -1) {
+    state.selectedSeatIds.push(seatId);
+    btn.classList.add('selected');
+    btn.classList.remove('available');
+  } else {
+    state.selectedSeatIds.splice(idx, 1);
+    btn.classList.remove('selected');
+    btn.classList.add('available');
+  }
+  updateBookingBar();
+}
+
+function updateBookingBar() {
+  const bar = document.getElementById('bookingBar');
+  const count = state.selectedSeatIds.length;
+  const price = state.currentSchedule?.price || 0;
+  
+  if (count > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bbSeatCount').textContent = count;
+    document.getElementById('bbTotal').textContent = (count * price).toFixed(0);
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function showPaymentModal(message = 'Processing Payment') {
+  const modal = document.createElement('div');
+  modal.className = 'payment-modal-overlay';
+  modal.id = 'paymentModal';
+  modal.innerHTML = `
+    <div class="payment-modal">
+      <div class="spinner" style="margin: 0 auto 1.5rem"></div>
+      <h3>${message}</h3>
+      <p>Please wait...</p>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function hidePaymentModal() {
+  const modal = document.getElementById('paymentModal');
+  if (modal) modal.remove();
+}
+
+async function confirmBooking() {
+  if (!state.token) {
+    navigate('auth');
+    toast('Please sign in to book tickets', 'info');
+    return;
+  }
+
+  if (state.selectedSeatIds.length === 0) {
+    toast('Please select at least one seat', 'error');
+    return;
+  }
+
+  const totalAmount = state.selectedSeatIds.length * state.currentSchedule.price;
+
+  if (!ENABLE_PAYMENT) {
+    try {
+      await createBookingAfterPayment(null);
+      toast('Booking confirmed! 🎉', 'success');
+      state.selectedSeatIds = [];
+      navigate('bookings');
+    } catch (e) {
+      toast(e.message || 'Booking failed', 'error');
+    }
+    return;
+  }
+
+  try {
+    const orderData = await http('POST', '/payments/create-order', null, {
+      amount: totalAmount
+    });
+
+    const orderId = orderData.orderId;
+
+    const options = {
+      key: RAZORPAY_KEY_ID,
+      amount: totalAmount * 100,
+      currency: 'INR',
+      name: 'BusBook',
+      description: `Bus Ticket - ${state.selectedSeatIds.length} seat(s)`,
+      order_id: orderId,
+      
+      handler: async function (response) {
+        const modal = showPaymentModal('Verifying Payment');
+        
+        try {
+          const verifyData = await http('POST', '/payments/verify', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          });
+
+          if (verifyData.status === 'PAYMENT_SUCCESS') {
+            await createBookingAfterPayment(response.razorpay_payment_id);
+            hidePaymentModal();
+            toast('Payment successful! Booking confirmed! 🎉', 'success');
+            state.selectedSeatIds = [];
+            navigate('bookings');
+          } else {
+            hidePaymentModal();
+            toast('Payment verification failed. Please contact support.', 'error');
+          }
+        } catch (error) {
+          hidePaymentModal();
+          console.error('Payment verification error:', error);
+          toast('Payment verification failed: ' + error.message, 'error');
+        }
+      },
+
+      prefill: {
+        name: state.name || '',
+        email: state.email || '',
+        contact: ''
+      },
+
+      notes: {
+        scheduleId: state.currentScheduleId,
+        seatCount: state.selectedSeatIds.length
+      },
+
+      theme: {
+        color: '#d84e55'
+      },
+
+      modal: {
+        ondismiss: function() {
+          toast('Payment cancelled', 'info');
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    
+    rzp.on('payment.failed', function (response) {
+      console.error('Payment failed:', response.error);
+      toast('Payment failed: ' + response.error.description, 'error');
+    });
+
+    rzp.open();
+
+  } catch (error) {
+    console.error('Payment initiation error:', error);
+    toast(error.message || 'Failed to initiate payment', 'error');
+  }
+}
+
+async function createBookingAfterPayment(paymentId) {
+  const bookingData = {
+    scheduleId: state.currentScheduleId,
+    seatIds: state.selectedSeatIds
+  };
+
+  if (paymentId) {
+    bookingData.paymentId = paymentId;
+  }
+
+  return await http('POST', '/bookings', null, {
+    scheduleId: state.currentScheduleId,
+    seatIds: state.selectedSeatIds
+  });
+}
+
+async function loadMyBookings() {
+  const el = document.getElementById('bookingsList');
+  el.innerHTML = '<div class="spinner-container"><div class="spinner"></div></div>';
+  
+  try {
+    const bookings = await http('GET', '/bookings/my');
+    
+    if (bookings.length === 0) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🎫</div>
+          <p class="empty-message">No bookings yet. Search for buses to get started!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    el.innerHTML = bookings.map(b => `
+      <div class="booking-card">
+        <div class="booking-header">
+          <div class="booking-id">Booking <strong>#${b.bookingId}</strong></div>
+          <span class="status-badge ${b.status.toLowerCase()}">${b.status}</span>
+        </div>
+        <div class="booking-route">
+          <span class="booking-city">${b.source}</span>
+          <span class="booking-arrow">→</span>
+          <span class="booking-city">${b.destination}</span>
+        </div>
+        <div class="booking-meta">
+          <span>📅 ${b.travelDate}</span>
+          <span>🕐 ${b.departureTime}</span>
+          <span>💰 Total: ₹${b.price}</span>
+        </div>
+        <div class="booking-seats-list">
+          ${b.seats.map(s => `<span class="seat-tag">Seat <strong>${s.seatNumber}</strong></span>`).join('')}
+        </div>
+        ${b.status === 'CONFIRMED' ? `
+          <div class="booking-actions">
+            <button class="btn btn-secondary btn-sm" onclick="downloadTicket(${b.bookingId})">
+              🎟️ Download Ticket
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.bookingId})">
+              ✕ Cancel Booking
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p class="empty-message">Failed to load bookings</p>
+      </div>
+    `;
+    toast(e.message || 'Failed to load bookings', 'error');
+  }
+}
+
+async function cancelBooking(id) {
+  if (!confirm('Are you sure you want to cancel this booking?')) return;
+  
+  try {
+    await http('POST', `/bookings/cancel/${id}`);
+    toast('Booking cancelled successfully', 'info');
+    loadMyBookings();
+  } catch (e) {
+    toast(e.message || 'Failed to cancel booking', 'error');
+  }
+}
+
+async function downloadTicket(bookingId) {
+  if (!state.token) {
+    toast('Please login first', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/bookings/${bookingId}/ticket`, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + state.token,
+        'Accept': 'application/pdf'
+      }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('Unauthorized. Please login again.');
+    }
+
+    if (!res.ok) {
+      throw new Error('Failed to download ticket');
+    }
+
+    let filename = `ticket-${bookingId}.pdf`;
+    const disposition = res.headers.get('Content-Disposition');
+    if (disposition && disposition.includes('filename=')) {
+      filename = disposition.split('filename=')[1].replace(/"/g, '');
+    }
+
+    const blob = await res.blob();
+
+    if (blob.type !== 'application/pdf') {
+      throw new Error('Invalid ticket file');
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+    toast('Ticket downloaded successfully 🎟️', 'success');
+
+  } catch (e) {
+    toast(e.message || 'Ticket download failed', 'error');
+  }
+}
+
+async function initAdmin() {
+  if (state.role !== 'ADMIN') return;
+  loadBuses();
+  loadRoutes();
+  loadSchedules();
+}
+
+function switchAdminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(b => 
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(tab))
+  );
+
+  ['buses','routes','schedules','seats','bookings'].forEach(t => {
+    document.getElementById('panel-' + t)?.classList.toggle('active', t === tab);
+  });
+
+  if (tab === 'bookings') loadSchedulesForAdminBookings();
+  if (tab === 'seats') loadSchedulesForSeatDropdown();
+}
+
+async function loadBuses() {
+  try {
+    const buses = await http('GET', '/admin/buses');
+    const el = document.getElementById('busesTable');
+    
+    if (buses.length === 0) {
+      el.innerHTML = '<div class="table-empty">No buses added yet</div>';
+      return;
+    }
+    
+    el.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bus Number</th>
+            <th>Bus Type</th>
+            <th>Total Seats</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${buses.map(b => `
+            <tr>
+              <td>${b.id}</td>
+              <td>${b.busNumber}</td>
+              <td>${b.busType}</td>
+              <td>${b.totalSeats}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    toast(e.message || 'Failed to load buses', 'error');
+  }
+}
+
+async function addBus() {
+  const num   = document.getElementById('addBusNumber').value.trim();
+  const type  = document.getElementById('addBusType').value.trim();
+  const seats = document.getElementById('addBusTotalSeats').value;
+  
+  if (!num || !type || !seats) return toast('Please fill in all fields', 'error');
+  
+  try {
+    await http('POST', '/admin/buses', { 
+      busNumber: num, 
+      busType: type, 
+      totalSeats: parseInt(seats) 
+    });
+    toast('Bus added successfully', 'success');
+    document.getElementById('addBusNumber').value = '';
+    document.getElementById('addBusType').value = '';
+    document.getElementById('addBusTotalSeats').value = '';
+    loadBuses();
+  } catch (e) {
+    toast(e.message || 'Failed to add bus', 'error');
+  }
+}
+
+async function loadRoutes() {
+  try {
+    const routes = await http('GET', '/admin/routes');
+    const el = document.getElementById('routesTable');
+    
+    if (routes.length === 0) {
+      el.innerHTML = '<div class="table-empty">No routes added yet</div>';
+      return;
+    }
+    
+    el.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Distance</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${routes.map(r => `
+            <tr>
+              <td>${r.id}</td>
+              <td>${r.source}</td>
+              <td>${r.destination}</td>
+              <td>${r.distance} km</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    toast(e.message || 'Failed to load routes', 'error');
+  }
+}
+
+async function addRoute() {
+  const src  = document.getElementById('addRouteSource').value.trim();
+  const dest = document.getElementById('addRouteDest').value.trim();
+  const dist = document.getElementById('addRouteDist').value;
+  
+  if (!src || !dest || !dist) return toast('Please fill in all fields', 'error');
+  
+  try {
+    await http('POST', '/admin/routes', { 
+      source: src, 
+      destination: dest, 
+      distance: parseInt(dist) 
+    });
+    toast('Route added successfully', 'success');
+    document.getElementById('addRouteSource').value = '';
+    document.getElementById('addRouteDest').value = '';
+    document.getElementById('addRouteDist').value = '';
+    loadRoutes();
+  } catch (e) {
+    toast(e.message || 'Failed to add route', 'error');
+  }
+}
+
+async function loadSchedules() {
+  try {
+    const [buses, routes, schedules] = await Promise.all([
+      http('GET', '/admin/buses'),
+      http('GET', '/admin/routes'),
+      http('GET', '/admin/schedules')
+    ]);
+    
+    document.getElementById('addSchedBus').innerHTML = 
+      '<option value="">Choose a bus</option>' +
+      buses.map(b => `<option value="${b.id}">${b.busNumber} — ${b.busType}</option>`).join('');
+    
+    document.getElementById('addSchedRoute').innerHTML = 
+      '<option value="">Choose a route</option>' +
+      routes.map(r => `<option value="${r.id}">${r.source} → ${r.destination}</option>`).join('');
+
+    const el = document.getElementById('schedulesTable');
+    
+    if (schedules.length === 0) {
+      el.innerHTML = '<div class="table-empty">No schedules added yet</div>';
+      return;
+    }
+    
+    el.innerHTML = `
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bus</th>
+            <th>Route</th>
+            <th>Date</th>
+            <th>Departure</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${schedules.map(s => `
+            <tr>
+              <td>${s.id}</td>
+              <td>${s.bus.busNumber} (${s.bus.busType})</td>
+              <td>${s.route.source} → ${s.route.destination}</td>
+              <td>${s.travelDate}</td>
+              <td>${s.departureTime}</td>
+              <td>₹${s.price}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    toast(e.message || 'Failed to load schedules', 'error');
+  }
+}
+
+async function addSchedule() {
+  const busId   = document.getElementById('addSchedBus').value;
+  const routeId = document.getElementById('addSchedRoute').value;
+  const date    = document.getElementById('addSchedDate').value;
+  const time    = document.getElementById('addSchedTime').value;
+  const price   = document.getElementById('addSchedPrice').value;
+  
+  if (!busId || !routeId || !date || !time || !price) {
+    return toast('Please fill in all fields', 'error');
+  }
+  
+  try {
+    await http('POST', '/admin/schedules', { 
+      travelDate: date, 
+      departureTime: time, 
+      price: parseFloat(price) 
+    }, { busId, routeId });
+    
+    toast('Schedule added successfully', 'success');
+    document.getElementById('addSchedDate').value = '';
+    document.getElementById('addSchedTime').value = '';
+    document.getElementById('addSchedPrice').value = '';
+    loadSchedules();
+  } catch (e) {
+    toast(e.message || 'Failed to add schedule', 'error');
+  }
+}
+
+async function loadSchedulesForSeatDropdown() {
+  try {
+    const schedules = await http('GET', '/admin/schedules');
+    document.getElementById('addSeatSchedule').innerHTML = 
+      '<option value="">Choose a schedule</option>' +
+      schedules.map(s => `
+        <option value="${s.id}">
+          ${s.bus.busNumber} | ${s.route.source} → ${s.route.destination} | ${s.travelDate}
+        </option>
+      `).join('');
+    renderAdminSeatsTable();
+  } catch (e) {
+    toast(e.message || 'Failed to load schedules', 'error');
+  }
+}
+
+function renderAdminSeatsTable() {
+  const el = document.getElementById('seatsAdminTable');
+  el.innerHTML = '<div class="table-empty">Select a schedule above to manage seats</div>';
+}
+
+async function addSeat() {
+  const schedId = document.getElementById('addSeatSchedule').value;
+  const num     = document.getElementById('addSeatNumber').value;
+  
+  if (!schedId || !num) return toast('Please select a schedule and enter seat number', 'error');
+  
+  try {
+    await http('POST', '/admin/seats', null, { 
+      scheduleId: schedId, 
+      seatNumber: parseInt(num) 
+    });
+    toast('Seat added successfully', 'success');
+    document.getElementById('addSeatNumber').value = '';
+  } catch (e) {
+    toast(e.message || 'Failed to add seat', 'error');
+  }
+}
+
+async function addBulkSeats() {
+  const schedId = document.getElementById('addSeatSchedule').value;
+  const from    = parseInt(document.getElementById('bulkFrom').value);
+  const to      = parseInt(document.getElementById('bulkTo').value);
+  
+  if (!schedId) return toast('Please select a schedule first', 'error');
+  if (!from || !to || from > to) return toast('Enter valid seat range (From ≤ To)', 'error');
+  
+  let added = 0;
+  let failed = 0;
+  
+  for (let i = from; i <= to; i++) {
+    try {
+      await http('POST', '/admin/seats', null, { 
+        scheduleId: schedId, 
+        seatNumber: i 
+      });
+      added++;
+    } catch (e) {
+      failed++;
+    }
+  }
+  
+  toast(`Added ${added} seat(s)${failed > 0 ? ` (${failed} already existed)` : ''}`, 'success');
+  document.getElementById('bulkFrom').value = '';
+  document.getElementById('bulkTo').value = '';
+}
+
+async function loadSchedulesForAdminBookings() {
+  try {
+    const schedules = await http('GET', '/admin/schedules');
+    document.getElementById('adminBookingSchedule').innerHTML =
+      '<option value="">Choose a schedule</option>' +
+      schedules.map(s => `
+        <option value="${s.id}">
+          ${s.bus.busNumber} | ${s.route.source} → ${s.route.destination} | ${s.travelDate}
+        </option>
+      `).join('');
+  } catch (e) {
+    toast('Failed to load schedules', 'error');
+  }
+}
+
+async function loadScheduleBookings() {
+  const scheduleId = document.getElementById('adminBookingSchedule').value;
+  if (!scheduleId) return toast('Please select a schedule', 'error');
+
+  document.getElementById('scheduleSummary').innerHTML =
+    '<div class="spinner-container"><div class="spinner"></div></div>';
+  document.getElementById('passengerTable').innerHTML = '';
+
+  try {
+    const data = await http('GET', `/admin/bookings/overview/${scheduleId}`);
+
+    document.getElementById('scheduleSummary').innerHTML = `
+      <div class="overview-summary">
+        <h4>${data.busNumber} (${data.busType})</h4>
+        <p><strong>Route:</strong> ${data.source} → ${data.destination}</p>
+        <p><strong>Date:</strong> ${data.travelDate} | ${data.departureTime}</p>
+        <div class="overview-stats">
+          <span>Total Seats: <strong>${data.totalSeats}</strong></span>
+          <span style="color: rgba(255,255,255,0.9)">Booked: <strong>${data.bookedSeats}</strong></span>
+          <span style="color: rgba(255,255,255,0.9)">Available: <strong>${data.availableSeats}</strong></span>
+        </div>
+      </div>
+    `;
+
+    if (data.passengers.length === 0) {
+      document.getElementById('passengerTable').innerHTML =
+        '<div class="table-empty">No bookings for this schedule yet</div>';
+      return;
+    }
+
+    document.getElementById('passengerTable').innerHTML = `
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Passenger Name</th>
+              <th>Email</th>
+              <th>Seats</th>
+              <th>Ticket Number</th>
+              <th>Booking Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.passengers.map(p => `
+              <tr>
+                <td>${p.passengerName}</td>
+                <td>${p.passengerEmail}</td>
+                <td>${p.seatNumbers.join(', ')}</td>
+                <td>${p.ticketNumber}</td>
+                <td>${p.bookingTime}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+  } catch (e) {
+    document.getElementById('scheduleSummary').innerHTML = '';
+    document.getElementById('passengerTable').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p class="empty-message">Failed to load booking data</p>
+      </div>
+    `;
+    toast(e.message || 'Failed to load booking data', 'error');
+  }
+}
+
+renderNav();
+if (state.token) navigate('home');
+
+console.log('%c🚀 BusBook Premium Initialized', 'color: #d84e55; font-size: 18px; font-weight: bold');
+console.log(`%cBackend: ${API}`, 'color: #10b981');
+console.log(`%cPayment: ${ENABLE_PAYMENT ? 'Enabled ✓' : 'Disabled ✗'}`, `color: ${ENABLE_PAYMENT ? '#10b981' : '#ef4444'}`);
+if (ENABLE_PAYMENT && RAZORPAY_KEY_ID.includes('test')) {
+  console.warn('%c⚠️ Using test Razorpay key. Update for production!', 'color: #f59e0b; font-size: 14px');
+}
+</script>
+</body>
+</html>
